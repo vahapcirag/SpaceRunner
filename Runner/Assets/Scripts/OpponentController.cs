@@ -15,6 +15,7 @@ public class OpponentController : MonoBehaviour
     private GameController gameController;
 
     private Vector3 path;
+    [SerializeField] private Vector3 beforeJump = Vector3.zero;
 
     private Animator anim;
 
@@ -23,10 +24,11 @@ public class OpponentController : MonoBehaviour
     public float force;
 
     [SerializeField] private bool changingPosition = false;
+    [SerializeField] private bool changingPositionStarted = false;
 
     private bool finded = false;
 
-    float refreshRate = 0.2f;
+    [SerializeField] float refreshRate;
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -51,16 +53,14 @@ public class OpponentController : MonoBehaviour
         if (transform.position.z > closestObstacle.transform.position.z)
             changingPosition = false;
 
-        else if ((!changingPosition || Mathf.Abs(closestObstacle.transform.position.z - transform.position.z) > 3 || Mathf.Abs(closestObstacle.transform.position.x - transform.position.x) > 0.5f))
+        else if ((!changingPosition || Mathf.Abs(closestObstacle.transform.position.z - transform.position.z) > 3 || Mathf.Abs(closestObstacle.transform.position.x - transform.position.x) > .35f))
             return;
-
 
         path = Vector3.zero;
         switch (otherObstacles.Count)
         {
             case 0:
                 path.x = Mathf.Sign(transform.position.x - closestObstacle.transform.position.x) * 0.01f;
-
                 break;
 
             case 1:
@@ -68,32 +68,34 @@ public class OpponentController : MonoBehaviour
                 break;
 
             default:
-                if (changingPosition)
+
+                if (transform.position.y - closestObstacle.transform.position.y < .3f)
                     rb.AddForce(Vector3.up * force, ForceMode.Acceleration);
                 break;
         }
 
-        StartCoroutine(ChancingPositionX(path));
+        if (!changingPositionStarted)
+            StartCoroutine(ChancingPositionX(path));
     }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.transform.parent != null && other.transform.parent.name == "Obstacles")
         {
-
-            anim.SetBool("floating", true);
+            string hitBool = "hitted" + Random.Range(0, 2).ToString();
+            anim.SetBool(hitBool, true);
 
 
             if (!Physics.GetIgnoreLayerCollision(int.Parse(gameObject.name[gameObject.name.Length - 1].ToString()) + 9, 8))
             {
                 Physics.IgnoreLayerCollision(int.Parse(gameObject.name[gameObject.name.Length - 1].ToString()) + 9, 8, true);
                 verticalRunSpeed /= 2;
-                StartCoroutine(FlashRenderer());
+                StartCoroutine(FlashRenderer(hitBool));
             }
         }
     }
 
-    IEnumerator FlashRenderer()
+    IEnumerator FlashRenderer(string hitBool)
     {
         int i = 0;
         while (i < 100)
@@ -106,17 +108,18 @@ public class OpponentController : MonoBehaviour
         verticalRunSpeed *= 2;
 
         Physics.IgnoreLayerCollision(int.Parse(gameObject.name[gameObject.name.Length - 1].ToString()) + 9, 8, false);
-        anim.SetBool("floating", false);
+        anim.SetBool(hitBool, false);
         yield return null;
     }
 
 
     IEnumerator ChancingPositionX(Vector3 path)
     {
+        changingPositionStarted = true;
 
         while (true)
         {
-            if (Mathf.Abs(transform.position.x - closestObstacle.transform.position.x) <= 1f)
+            if (Mathf.Abs(transform.position.x - closestObstacle.transform.position.x) <= 0.25f)
                 transform.position += path;
 
             yield return new WaitForSecondsRealtime(0.0001f);
@@ -126,13 +129,16 @@ public class OpponentController : MonoBehaviour
                 if (otherObstacles.Count >= 2)
                 {
                     rb.AddForce(Vector3.down * force, ForceMode.Acceleration);
-                }
-                changingPosition = false;
 
+                }
+
+
+                changingPosition = false;
                 break;
             }
 
         }
+        changingPositionStarted = false;
         yield return null;
     }
 
@@ -176,6 +182,7 @@ public class OpponentController : MonoBehaviour
         if (closestObstacle.transform.position.z - transform.position.z < 2 && closestObstacle.transform.position.z - transform.position.z > 0)
         {
             changingPosition = true;
+            beforeJump = transform.position;
         }
 
 

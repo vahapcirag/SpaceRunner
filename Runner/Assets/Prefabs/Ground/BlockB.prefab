@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2617343294123741884}
   - component: {fileID: 8605854079839956549}
   - component: {fileID: 2050010474428859287}
-  m_Layer: 0
+  m_Layer: 18
   m_Name: BlockB
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 8021742975332047513}
   m_LocalRotation: {x: -0.70710194, y: -0.0026286843, z: 0.0026288035, w: 0.70710194}
   m_LocalPosition: {x: 27.2, y: -3.44, z: -0}
-  m_LocalScale: {x: 3, y: 3, z: 1}
+  m_LocalScale: {x: 1, y: 3, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
