@@ -657,6 +657,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\GameController.cs" />
     <Compile Include="Assets\Scripts\ObstacleManager.cs" />
+    <Compile Include="Assets\Scripts\OpponentAnimationEvents.cs" />
     <Compile Include="Assets\Scripts\OpponentController.cs" />
     <Compile Include="Assets\Scripts\PlayerAnimationEvents.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />

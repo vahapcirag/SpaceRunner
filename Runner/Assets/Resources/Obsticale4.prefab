@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5649338553945302198}
   - component: {fileID: 3561158888090275256}
   - component: {fileID: 6792127250116927471}
+  - component: {fileID: 7609871357828338525}
   m_Layer: 8
   m_Name: Obsticale4
   m_TagString: Obstacle
@@ -107,3 +108,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
+--- !u!54 &7609871357828338525
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6222476562017947754}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

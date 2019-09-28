@@ -10,9 +10,11 @@ public class PlayerController : MonoBehaviour
     public float verticalForce;
 
     public bool shielded;
+    private bool flying;
     [SerializeField] float time;
 
     public GameObject[] particles;
+    public GameObject canvas;
 
     private Rigidbody rb;
     private Rigidbody cameraRb;
@@ -46,24 +48,38 @@ public class PlayerController : MonoBehaviour
             return;
 
         if (GameObject.Find("TimeStopper").transform.position.z <= transform.position.z)
+        {
+            canvas.SetActive(true);
             Time.timeScale = 0;
+        }
 
 
         if (Input./*GetButton("Vertical")*/touchCount != 0)
         {
 
+
             Touch touch = Input.GetTouch(0);
 
-            if (touch.phase == TouchPhase.Ended)
+
+
+            if (Mathf.Abs(touch.deltaPosition.x) > .7f || touch.phase == TouchPhase.Ended)
             {
-                if (Mathf.Abs(touch.deltaPosition.x) > 1f)
+                if (flying)
+                {
+
+                    particles[0].SetActive(false);
+                    particles[1].SetActive(false);
+                }
+
+                else if (Mathf.Abs(touch.deltaPosition.x) > 1f)
                     StartCoroutine(LeftRight(touch.deltaPosition.x, transform.position.x));
                 // rb.AddForce(Mathf.Abs(touch.deltaPosition.x) / touch.deltaPosition.x * Vector3.right * horizontalForce, ForceMode.Acceleration);
             }
-            else if (touch.deltaPosition.x < 1f && time >0.3f)
+            else if (touch.deltaPosition.x < 0.3f && time > 0.3f)
             {
                 if (time < 1f)
                 {
+                    flying = true;
                     rb.AddForce(Vector3.up * verticalForce, ForceMode.Acceleration);
                     anim.SetBool("floating", true);
 
@@ -73,6 +89,7 @@ public class PlayerController : MonoBehaviour
 
             }
         }
+
         else
         {
             time = 0;
@@ -97,13 +114,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
-    private void Update()
-    {
-
-
-        Debug.Log(" Ignoring: " + Physics.GetIgnoreLayerCollision(8, 9));
-    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -130,6 +140,7 @@ public class PlayerController : MonoBehaviour
             anim.SetBool("floating", false);
             particles[0].SetActive(false);
             particles[1].SetActive(false);
+            flying = false;
         }
 
         else if (other.tag == "Shield")
@@ -154,7 +165,7 @@ public class PlayerController : MonoBehaviour
         }
 
         //Physics.IgnoreLayerCollision(8, 9, false);
-        Debug.Log("Fix" + " Ignoring: " + Physics.GetIgnoreLayerCollision(8, 9));
+       
 
         yield return null;
     }
@@ -166,8 +177,8 @@ public class PlayerController : MonoBehaviour
         while (true)
         {
             if (Mathf.Abs((transform.position + Vector3.right * 0.1f * Mathf.Sign(deltaPos)).x) < 2.70f)
-                transform.position += Vector3.right * 0.02f * Mathf.Sign(deltaPos);
-            yield return new WaitForSecondsRealtime(0.01f);
+                transform.position += Vector3.right * 0.003f * Mathf.Sign(deltaPos);
+            yield return new WaitForSecondsRealtime(0.03f);
             if (Mathf.Abs(transform.position.x - startX) > 0.15f)
                 break;
         }

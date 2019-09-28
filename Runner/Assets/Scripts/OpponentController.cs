@@ -17,11 +17,13 @@ public class OpponentController : MonoBehaviour
     private Vector3 path;
     [SerializeField] private Vector3 beforeJump = Vector3.zero;
 
-    private Animator anim;
+    public  Animator anim;
 
     public float horizontalRunSpeed;
+    public float fixedVerticalRunSpeed;
     public float verticalRunSpeed;
     public float force;
+    [SerializeField]private float dedectingObstaclesDistance;
 
     [SerializeField] private bool changingPosition = false;
     [SerializeField] private bool changingPositionStarted = false;
@@ -29,22 +31,29 @@ public class OpponentController : MonoBehaviour
     private bool finded = false;
 
     [SerializeField] float refreshRate;
+
+    Vector3 direction;
     private void Start()
     {
+        dedectingObstaclesDistance= Random.Range(1, 8);
         rb = GetComponent<Rigidbody>();
         gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
         anim = transform.GetChild(0).GetComponent<Animator>();
+        
+        Debug.Log(obstacles.Length);
+        InvokeRepeating("FindTheClosestObstacle", 0.1f, refreshRate);
 
-        InvokeRepeating("FindTheClosestObstacle", 0, refreshRate);
+        
+       
     }
 
     private void FixedUpdate()
     {
-        obstacles = GameObject.FindGameObjectsWithTag("Obstacle");
+
         if (!gameController.started)
             return;
 
-        Vector3 direction = transform.forward * verticalRunSpeed * Time.deltaTime;
+        direction = transform.forward * verticalRunSpeed * Time.deltaTime;
         transform.position += direction;
 
         if (!finded)
@@ -53,7 +62,7 @@ public class OpponentController : MonoBehaviour
         if (transform.position.z > closestObstacle.transform.position.z)
             changingPosition = false;
 
-        else if ((!changingPosition || Mathf.Abs(closestObstacle.transform.position.z - transform.position.z) > 3 || Mathf.Abs(closestObstacle.transform.position.x - transform.position.x) > .35f))
+        else if ((  Mathf.Abs(closestObstacle.transform.position.z - transform.position.z) > dedectingObstaclesDistance || Mathf.Abs(closestObstacle.transform.position.x - transform.position.x) > .5f))
             return;
 
         path = Vector3.zero;
@@ -82,14 +91,14 @@ public class OpponentController : MonoBehaviour
     {
         if (other.transform.parent != null && other.transform.parent.name == "Obstacles")
         {
-            string hitBool = "hitted" + Random.Range(0, 2).ToString();
+            string hitBool = "hitted" + Random.Range(1, 2).ToString();
             anim.SetBool(hitBool, true);
 
 
             if (!Physics.GetIgnoreLayerCollision(int.Parse(gameObject.name[gameObject.name.Length - 1].ToString()) + 9, 8))
             {
                 Physics.IgnoreLayerCollision(int.Parse(gameObject.name[gameObject.name.Length - 1].ToString()) + 9, 8, true);
-                verticalRunSpeed /= 2;
+                verticalRunSpeed = 0;
                 StartCoroutine(FlashRenderer(hitBool));
             }
         }
@@ -105,24 +114,25 @@ public class OpponentController : MonoBehaviour
                 yield return new WaitForSecondsRealtime(.03f);
             i++;
         }
-        verticalRunSpeed *= 2;
+        
 
-        Physics.IgnoreLayerCollision(int.Parse(gameObject.name[gameObject.name.Length - 1].ToString()) + 9, 8, false);
-        anim.SetBool(hitBool, false);
+        //Physics.IgnoreLayerCollision(int.Parse(gameObject.name[gameObject.name.Length - 1].ToString()) + 9, 8, false);
+       // anim.SetBool(hitBool, false);
         yield return null;
     }
 
 
     IEnumerator ChancingPositionX(Vector3 path)
     {
+       
         changingPositionStarted = true;
 
         while (true)
         {
-            if (Mathf.Abs(transform.position.x - closestObstacle.transform.position.x) <= 0.25f)
+            if (Mathf.Abs(transform.position.x - closestObstacle.transform.position.x) <= 0.4f)
                 transform.position += path;
 
-            yield return new WaitForSecondsRealtime(0.0001f);
+            yield return new WaitForSecondsRealtime(0.01f);
 
             if (transform.position.z - closestObstacle.transform.position.z > 0.1f)
             {
@@ -134,17 +144,19 @@ public class OpponentController : MonoBehaviour
 
 
                 changingPosition = false;
+
+                changingPositionStarted = false;
                 break;
             }
 
         }
-        changingPositionStarted = false;
         yield return null;
     }
 
 
     void FindTheClosestObstacle()
     {
+        obstacles = GameObject.FindGameObjectsWithTag("Obstacle");
         finded = true;
 
         if (changingPosition)
@@ -161,7 +173,6 @@ public class OpponentController : MonoBehaviour
             else if (obstacles[i].transform.position.z >= transform.position.z &&
                 (Mathf.Abs((transform.position - closestObstacle.transform.position).magnitude) > Mathf.Abs((transform.position - obstacles[i].transform.position).magnitude)))
             {
-
                 this.closestObstacle = obstacles[i];
             }
         }

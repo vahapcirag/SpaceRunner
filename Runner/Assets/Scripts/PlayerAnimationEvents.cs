@@ -16,11 +16,7 @@ public class PlayerAnimationEvents : MonoBehaviour
     {
         GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>().started = true;
 
-        foreach (var item in GameObject.FindGameObjectsWithTag("Opponent"))
-        {
-            Animator anim = item.transform.GetChild(0).GetComponent<Animator>();
-            anim.SetBool("started", true);
-        }
+        Invoke("FixCollision", 1.5f);
 
         PlayerController playerController = GetComponentInParent<PlayerController>();
 
@@ -31,7 +27,7 @@ public class PlayerAnimationEvents : MonoBehaviour
     {
         playerController.anim.SetBool("hitted1", false);
         playerController.anim.SetBool("hitted2", false);
-        Invoke("FixCollision", 3f);
+        
     }
 
 
